@@ -56,6 +56,12 @@
     mode: 0755
   notify: restart cowrie
 
+- name: put data/userdb.txt
+  copy:
+    src: home/cowrie/cowrie/data/userdb.txt
+    dest: /home/cowrie/cowrie-{{ cowrie_version }}/data/userdb.txt
+    owner: cowrie
+
 - name: install pip modules
   pip:
     requirements: /home/cowrie/cowrie-{{ cowrie_version }}/requirements.txt
