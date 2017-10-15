@@ -1,0 +1,43 @@
+---
+- name: add user
+  user:
+    name: wordpot
+    state: present
+
+- name: download source
+  get_url:
+    url: https://github.com/gbrindisi/wordpot/archive/master.tar.gz
+    dest: /usr/local/src/wordpot.tar.gz
+
+- name: unarchive source
+  unarchive:
+    src: /usr/local/src/wordpot.tar.gz
+    dest: /home/wordpot
+    creates: /home/wordpot/wordpot-master/README.md
+    remote_src: yes
+    owner: wordpot
+    group: users
+  #notify: restart wordpot
+
+- name: install pip modules
+  pip:
+    requirements: /home/wordpot/wordpot-master/requirements.txt
+
+- name: put nginx config file
+  template:
+    src: etc/nginx/conf.d/wordpot.conf.j2
+    dest: /etc/nginx/conf.d/wordpot.conf
+  notify: reload nginx
+
+- name: put systemd config file
+  template:
+    src: etc/systemd/system/wordpot.service.j2
+    dest: /etc/systemd/system/wordpot.service
+  notify: restart wordpot
+
+- name: start wordpot automatically
+  systemd:
+    name: wordpot.service
+    state: started
+    daemon_reload: yes
+    enabled: yes

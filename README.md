@@ -8,6 +8,7 @@ Set up various honeypot servers
 * [Cowrie](https://github.com/micheloosterhof/cowrie) - SSH and Telnet honeypot (port 22, 23).
 * [Mailoney](https://github.com/awhitehatter/mailoney) - SMTP-AUTH honeypot (port 587).
 * Postfix - SMTP open relay mail server (port 25).
+* [Wordpot](https://github.com/gbrindisi/wordpot) - Wordpress honeypot (port 80 via Nginx).
 
 ## Requirements
 

@@ -1,0 +1,7 @@
+server{
+    proxy_set_header    Host    $host;
+
+    location / {
+        proxy_pass    http://localhost:{{ wordpot_port }}/;
+    }
+}

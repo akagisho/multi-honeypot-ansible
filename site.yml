@@ -8,3 +8,5 @@
     - cowrie
     - mailoney
     - postfix
+    - nginx
+    - wordpot
