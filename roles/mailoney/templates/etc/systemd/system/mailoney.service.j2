@@ -1,0 +1,12 @@
+[Unit]
+Description = mailoney daemon
+
+[Service]
+WorkingDirectory = /home/mailoney/mailoney-{{ mailoney_version }}
+ExecStart = /usr/bin/python /home/mailoney/mailoney-{{ mailoney_version }}/mailoney.py -p {{ mailoney_port }} -s {{ mailoney_name }} -t postfix_creds
+Restart = always
+Type = simple
+User = mailoney
+
+[Install]
+WantedBy=multi-user.target

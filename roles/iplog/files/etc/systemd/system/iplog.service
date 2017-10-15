@@ -1,0 +1,10 @@
+[Unit]
+Description = iplog daemon
+
+[Service]
+ExecStart = /usr/local/sbin/iplog --no-fork --ignore
+Restart = always
+Type = simple
+
+[Install]
+WantedBy=multi-user.target

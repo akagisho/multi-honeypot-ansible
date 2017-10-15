@@ -1,0 +1,4 @@
+---
+cowrie_version: 1.2.0
+cowrie_port: 2222
+cowrie_use_wellknown_port: True

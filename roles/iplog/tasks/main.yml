@@ -1,0 +1,68 @@
+---
+- name: create group
+  group:
+    name: iplog
+
+- name: add user
+  user:
+    name: iplog
+    state: present
+    groups: iplog
+
+- name: install packages
+  yum: name={{ item }}
+  with_items:
+    - gcc
+    - make
+    - libpcap
+    - libpcap-devel
+
+- name: download source
+  get_url:
+    url: https://jaist.dl.sourceforge.net/project/ojnk/iplog/2.2.3/iplog-2.2.3.tar.gz
+    dest: /usr/local/src/iplog-2.2.3.tar.gz
+
+- name: unarchive source
+  unarchive:
+    src: /usr/local/src/iplog-2.2.3.tar.gz
+    dest: /usr/local/src
+    creates: /usr/local/src/iplog-2.2.3/README
+    remote_src: yes
+
+- name: put iplog_options.c
+  copy:
+    src: usr/local/src/iplog-2.2.3/src/iplog_options.c
+    dest: /usr/local/src/iplog-2.2.3/src/iplog_options.c
+
+- name: install iplog
+  shell: ./configure && make && make install
+  args:
+    chdir: /usr/local/src/iplog-2.2.3
+    creates: /usr/local/sbin/iplog
+  notify: restart iplog
+
+- name: put iplog.conf
+  copy:
+    src: etc/iplog.conf
+    dest: /etc/iplog.conf
+  notify: restart iplog
+
+- name: create direcrory
+  file:
+    path: /var/log/iplog
+    state: directory
+    owner: iplog
+    group: iplog
+
+- name: put systemd config file
+  copy:
+    src: etc/systemd/system/iplog.service
+    dest: /etc/systemd/system/iplog.service
+  notify: restart iplog
+
+- name: start iplog automatically
+  systemd:
+    name: iplog.service
+    state: started
+    daemon_reload: yes
+    enabled: yes

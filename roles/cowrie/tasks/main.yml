@@ -1,0 +1,90 @@
+---
+- name: add user
+  user:
+    name: cowrie
+    state: present
+
+- name: install packages
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - git
+    - python-setuptools
+    - python-devel
+    - gmp-devel
+    - mpfr-devel
+    - libmpc-devel
+
+- name: install python modules
+  shell: easy_install {{ item }}
+  with_items:
+    - pip
+    - PyCrypto
+    - pyasn1
+    - twisted
+  register: result
+  changed_when: '"Installed" in result.stdout'
+
+- name: download source
+  get_url:
+    url: https://github.com/micheloosterhof/cowrie/archive/v{{ cowrie_version }}.tar.gz
+    dest: /usr/local/src/cowrie-v{{ cowrie_version }}.tar.gz
+
+- name: unarchive source
+  unarchive:
+    src: /usr/local/src/cowrie-v{{ cowrie_version }}.tar.gz
+    dest: /home/cowrie
+    creates: /home/cowrie/cowrie-{{ cowrie_version }}/README.md
+    remote_src: yes
+    owner: cowrie
+    group: users
+
+- name: put cowrie.cfg
+  template:
+    src: home/cowrie/cowrie/cowrie.cfg.j2
+    dest: /home/cowrie/cowrie-{{ cowrie_version }}/cowrie.cfg
+    owner: cowrie
+    group: users
+  notify: restart cowrie
+
+- name: put bin/cowrie
+  copy:
+    src: home/cowrie/cowrie/bin/cowrie
+    dest: /home/cowrie/cowrie-{{ cowrie_version }}/bin/cowrie
+    owner: cowrie
+    group: users
+    mode: 0755
+  notify: restart cowrie
+
+- name: install pip modules
+  pip:
+    requirements: /home/cowrie/cowrie-{{ cowrie_version }}/requirements.txt
+
+- name: put systemd config file
+  template:
+    src: etc/systemd/system/cowrie.service.j2
+    dest: /etc/systemd/system/cowrie.service
+  notify: restart cowrie
+
+- name: start cowrie automatically
+  systemd:
+    name: cowrie.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+- name: open port
+  firewalld:
+    port: 22/tcp
+    permanent: true
+    immediate: true
+    state: enabled
+  when: ansible_port != 22 and cowrie_use_wellknown_port
+
+- name: set port forwarding
+  shell: firewall-cmd --permanent --zone=public --add-forward-port=port=22:proto=tcp:toport={{ cowrie_port }}
+  register: result
+  changed_when: '"ALREADY_ENABLED" not in result.stderr'
+  failed_when: '"success" not in result.stdout'
+  notify: reload firewalld
+  when: ansible_port != 22 and cowrie_use_wellknown_port

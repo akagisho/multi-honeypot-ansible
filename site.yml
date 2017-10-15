@@ -1,0 +1,10 @@
+---
+- hosts: default
+  become: yes
+  roles:
+    - centos7-common
+    - honeypot-common
+    - iplog
+    - cowrie
+    - mailoney
+    - postfix

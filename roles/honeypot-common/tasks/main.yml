@@ -1,0 +1,29 @@
+---
+- name: create group
+  group:
+    name: honeypot
+
+- name: add user
+  user:
+    name: honeypot
+    state: present
+    groups: honeypot
+
+- name: install packages
+  yum: name={{ item }}
+  with_items:
+    - firewalld
+
+- name: start firewalld automatically
+  systemd:
+    name: firewalld.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+- name: open port
+  firewalld:
+    port: "{{ ansible_port }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled

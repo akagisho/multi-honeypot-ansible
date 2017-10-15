@@ -1,0 +1,2 @@
+[default]
+honeypot.example.com ansible_user=root ansible_port=10022

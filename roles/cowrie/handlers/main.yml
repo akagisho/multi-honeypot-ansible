@@ -1,0 +1,5 @@
+---
+- name: restart cowrie
+  systemd:
+    name: cowrie.service
+    state: restarted

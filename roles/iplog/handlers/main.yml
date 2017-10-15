@@ -1,0 +1,5 @@
+---
+- name: restart iplog
+  systemd:
+    name: iplog.service
+    state: restarted

@@ -1,0 +1,12 @@
+[Unit]
+Description = cowrie daemon
+
+[Service]
+WorkingDirectory = /home/cowrie/cowrie-{{ cowrie_version }}
+ExecStart = /home/cowrie/cowrie-{{ cowrie_version }}/bin/cowrie start
+Restart = always
+Type = simple
+User = cowrie
+
+[Install]
+WantedBy=multi-user.target

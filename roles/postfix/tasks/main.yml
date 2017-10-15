@@ -1,0 +1,26 @@
+---
+- name: install postfix
+  yum: name={{ item }}
+  with_items:
+    - postfix
+  notify: restart postfix
+
+- name: start postfix automatically
+  service:
+    name: postfix
+    state: started
+
+- name: put config files
+  template:
+    src: '{{ item }}'
+    dest: /etc/postfix/{{ item | basename | regex_replace('\.j2$','') }}
+  with_fileglob:
+    - ../templates/etc/postfix/*.j2
+  notify: restart postfix
+
+- name: open port
+  firewalld:
+    port: 25/tcp
+    permanent: true
+    immediate: true
+    state: enabled

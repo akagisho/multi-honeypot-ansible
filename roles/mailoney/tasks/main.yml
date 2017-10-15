@@ -1,0 +1,53 @@
+---
+- name: add user
+  user:
+    name: mailoney
+    state: present
+
+- name: download source
+  get_url:
+    url: https://github.com/awhitehatter/mailoney/archive/{{ mailoney_version }}.tar.gz
+    dest: /usr/local/src/mailoney-v{{ mailoney_version }}.tar.gz
+
+- name: unarchive source
+  unarchive:
+    src: /usr/local/src/mailoney-v{{ mailoney_version }}.tar.gz
+    dest: /home/mailoney
+    creates: /home/mailoney/mailoney-{{ mailoney_version }}/README.md
+    remote_src: yes
+    owner: mailoney
+    group: users
+  notify: restart mailoney
+
+- name: create direcrory
+  file:
+    path: /home/mailoney/mailoney-{{ mailoney_version }}/logs
+    state: directory
+    owner: mailoney
+
+- name: put systemd config file
+  template:
+    src: etc/systemd/system/mailoney.service.j2
+    dest: /etc/systemd/system/mailoney.service
+  notify: restart mailoney
+
+- name: start mailoney automatically
+  systemd:
+    name: mailoney.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+- name: open port
+  firewalld:
+    port: 587/tcp
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: set port forwarding
+  shell: firewall-cmd --permanent --zone=public --add-forward-port=port=587:proto=tcp:toport={{ mailoney_port }}
+  register: result
+  changed_when: '"ALREADY_ENABLED" not in result.stderr'
+  failed_when: '"success" not in result.stdout'
+  notify: reload firewalld
