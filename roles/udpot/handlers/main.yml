@@ -1,0 +1,10 @@
+---
+- name: restart udpot
+  service:
+    name: udpot
+    state: restarted
+
+- name: reload firewalld
+  shell: firewall-cmd --reload
+  register: result
+  failed_when: '"success" not in result.stdout'

@@ -9,6 +9,7 @@ Set up various honeypot servers
 * [Mailoney](https://github.com/awhitehatter/mailoney) - SMTP-AUTH honeypot (port 587).
 * Postfix - SMTP open relay mail server (port 25).
 * [Wordpot](https://github.com/gbrindisi/wordpot) - Wordpress honeypot (port 80 via Nginx).
+* [UDPot](https://github.com/jekil/UDPot) - DNS honeypot (port 53).
 
 ## Requirements
 

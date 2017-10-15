@@ -1,0 +1,51 @@
+---
+- name: add user
+  user:
+    name: udpot
+    state: present
+
+- name: download source
+  get_url:
+    url: https://github.com/jekil/UDPot/archive/master.tar.gz
+    dest: /usr/local/src/udpot.tar.gz
+
+- name: unarchive source
+  unarchive:
+    src: /usr/local/src/udpot.tar.gz
+    dest: /home/udpot
+    creates: /home/udpot/UDPot-master/README.md
+    remote_src: yes
+    owner: udpot
+    group: users
+  notify: restart udpot
+
+- name: install pip modules
+  pip:
+    requirements: /home/udpot/UDPot-master/requirements.txt
+
+- name: put systemd config file
+  template:
+    src: etc/systemd/system/udpot.service.j2
+    dest: /etc/systemd/system/udpot.service
+  notify: restart udpot
+
+- name: start udpot automatically
+  systemd:
+    name: udpot.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+- name: open port
+  firewalld:
+    port: 80/tcp
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: set port forwarding
+  shell: firewall-cmd --permanent --zone=public --add-forward-port=port=53:proto=udp:toport={{ udpot_port }}
+  register: result
+  changed_when: '"ALREADY_ENABLED" not in result.stderr'
+  failed_when: '"success" not in result.stdout'
+  notify: reload firewalld
