@@ -1,4 +1,5 @@
 ---
 cowrie_version: 1.2.0
-cowrie_port: 2222
+cowrie_ssh_port: 2222
+cowrie_telnet_port: 2223
 cowrie_use_wellknown_port: True

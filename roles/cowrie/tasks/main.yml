@@ -73,7 +73,7 @@
     daemon_reload: yes
     enabled: yes
 
-- name: open port
+- name: open port for ssh
   firewalld:
     port: 22/tcp
     permanent: true
@@ -81,10 +81,24 @@
     state: enabled
   when: ansible_port != 22 and cowrie_use_wellknown_port
 
-- name: set port forwarding
-  shell: firewall-cmd --permanent --zone=public --add-forward-port=port=22:proto=tcp:toport={{ cowrie_port }}
+- name: set port forwarding for ssh
+  shell: firewall-cmd --permanent --zone=public --add-forward-port=port=22:proto=tcp:toport={{ cowrie_ssh_port }}
   register: result
   changed_when: '"ALREADY_ENABLED" not in result.stderr'
   failed_when: '"success" not in result.stdout'
   notify: reload firewalld
   when: ansible_port != 22 and cowrie_use_wellknown_port
+
+- name: open port for telnet
+  firewalld:
+    port: 23/tcp
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: set port forwarding for telnet
+  shell: firewall-cmd --permanent --zone=public --add-forward-port=port=23:proto=tcp:toport={{ cowrie_telnet_port }}
+  register: result
+  changed_when: '"ALREADY_ENABLED" not in result.stderr'
+  failed_when: '"success" not in result.stdout'
+  notify: reload firewalld

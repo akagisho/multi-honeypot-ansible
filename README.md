@@ -5,7 +5,7 @@ Set up various honeypot servers
 ## Supported softwares
 
 * [iplog](http://freecode.com/projects/iplog) - TCP/IP traffic logger.
-* [Cowrie](https://github.com/micheloosterhof/cowrie) - SSH honeypot (port 22).
+* [Cowrie](https://github.com/micheloosterhof/cowrie) - SSH and Telnet honeypot (port 22, 23).
 * [Mailoney](https://github.com/awhitehatter/mailoney) - SMTP-AUTH honeypot (port 587).
 * Postfix - SMTP open relay mail server (port 25).
 
