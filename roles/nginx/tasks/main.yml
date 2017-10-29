@@ -21,6 +21,11 @@
     name: nginx
     state: started
 
+- name: put logrotate config file
+  copy:
+    src: etc/logrotate.d/nginx
+    dest: /etc/logrotate.d/nginx
+
 - name: open port
   firewalld:
     port: 80/tcp

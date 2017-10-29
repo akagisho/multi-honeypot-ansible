@@ -1,0 +1,12 @@
+/var/log/iplog/iplog {
+    weekly
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
+    sharedscripts
+    postrotate
+        /usr/bin/systemctl status iplog.service && /usr/bin/systemctl restart iplog.service
+    endscript
+}

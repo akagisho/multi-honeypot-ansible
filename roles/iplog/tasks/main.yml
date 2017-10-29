@@ -66,3 +66,8 @@
     state: started
     daemon_reload: yes
     enabled: yes
+
+- name: put logrotate config file
+  copy:
+    src: etc/logrotate.d/iplog
+    dest: /etc/logrotate.d/iplog

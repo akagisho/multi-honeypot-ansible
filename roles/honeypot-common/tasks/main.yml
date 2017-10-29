@@ -13,6 +13,7 @@
   yum: name={{ item }}
   with_items:
     - firewalld
+    - logrotate
 
 - name: start firewalld automatically
   systemd:
