@@ -1,0 +1,40 @@
+---
+- name: install packages
+  yum: name={{ item }}
+  with_items:
+    - awstats
+    - GeoIP-data
+
+- name: put awstats config file
+  copy:
+    src: etc/awstats/awstats.nginx.conf
+    dest: /etc/awstats/awstats.nginx.conf
+
+- name: put nginx config file
+  template:
+    src: etc/nginx/conf.d/awstats.conf.j2
+    dest: /etc/nginx/conf.d/awstats.conf
+  notify: reload nginx
+
+- name: put robots.txt
+  copy:
+    src: usr/share/awstats/wwwroot/robots.txt
+    dest: /usr/share/awstats/wwwroot/robots.txt
+
+- name: open port
+  firewalld:
+    port: '{{ awstats_port }}/tcp'
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: remove cron job
+  file:
+    dest: /etc/cron.hourly/awstats
+    state: absent
+
+- name: add cron job
+  cron:
+    name: 'awstats'
+    minute: 55
+    job: 'mkdir -p /usr/share/awstats/wwwroot/$(date +\%Y\%m) && cd /usr/share/awstats/wwwroot/$(date +\%Y\%m) && /usr/share/awstats/tools/awstats_buildstaticpages.pl -config=nginx -update > /dev/null'

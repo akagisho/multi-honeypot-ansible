@@ -9,5 +9,6 @@
     - mailoney
     - postfix
     - nginx
+    - nginx-awstats
     - wordpot
     - udpot

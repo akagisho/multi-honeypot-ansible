@@ -14,6 +14,7 @@
   with_items:
     - firewalld
     - logrotate
+    - http://ftp-srv2.kddilabs.jp/Linux/distributions/fedora/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
 
 - name: start firewalld automatically
   systemd:

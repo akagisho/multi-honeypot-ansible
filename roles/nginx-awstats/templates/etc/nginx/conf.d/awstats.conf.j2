@@ -1,0 +1,12 @@
+server {
+    listen       {{ awstats_port }};
+    server_name  localhost;
+
+    access_log   off;
+
+    location / {
+        root   /usr/share/awstats/wwwroot;
+        index  awstats.nginx.html index.html;
+    }
+}
+
