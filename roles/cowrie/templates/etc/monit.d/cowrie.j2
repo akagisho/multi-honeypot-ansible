@@ -1,0 +1,4 @@
+check process cowrie with pidfile /home/cowrie/cowrie-{{ cowrie_version }}/var/run/cowrie.pid
+    start program = "/usr/bin/systemctl start cowrie"
+    stop program = "/usr/bin/systemctl stop cowrie"
+    if 5 restarts within 5 cycles then timeout

@@ -1,0 +1,13 @@
+---
+- name: install monit
+  yum: name={{ item }}
+  with_items:
+    - monit
+  notify: restart monit
+
+- name: start monit automatically
+  systemd:
+    name: monit.service
+    state: started
+    daemon_reload: yes
+    enabled: yes

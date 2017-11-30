@@ -71,3 +71,9 @@
   copy:
     src: etc/logrotate.d/iplog
     dest: /etc/logrotate.d/iplog
+
+- name: put monit config
+  copy:
+    src: etc/monit.d/iplog
+    dest: /etc/monit.d/iplog
+  notify: reload monit

@@ -108,3 +108,9 @@
   changed_when: '"ALREADY_ENABLED" not in result.stderr'
   failed_when: '"success" not in result.stdout'
   notify: reload firewalld
+
+- name: put monit config
+  template:
+    src: etc/monit.d/cowrie.j2
+    dest: /etc/monit.d/cowrie
+  notify: reload monit

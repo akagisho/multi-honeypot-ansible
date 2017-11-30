@@ -4,6 +4,7 @@
   roles:
     - centos7-common
     - honeypot-common
+    - monit
     - iplog
     - cowrie
     - mailoney

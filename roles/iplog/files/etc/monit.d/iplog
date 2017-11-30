@@ -1,0 +1,4 @@
+check process iplog with pidfile /var/run/iplog.pid  
+    start program = "/usr/bin/systemctl start iplog"
+    stop program = "/usr/bin/systemctl stop iplog"
+    if 5 restarts within 5 cycles then timeout

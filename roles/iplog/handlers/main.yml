@@ -3,3 +3,8 @@
   systemd:
     name: iplog.service
     state: restarted
+
+- name: reload monit
+  service:
+    name: monit
+    state: reloaded
