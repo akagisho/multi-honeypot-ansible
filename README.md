@@ -48,3 +48,10 @@ Run ansible playbook.
 
     $ vagrant up
     $ vagrant provision
+
+## View results
+
+- iplog: `/var/log/iplog/iplog`
+- cowrie log: `/home/cowrie/cowrie-*/log/`
+- Maildir: `/home/honeypot/Maildir/new/`
+- UDPot log: `/home/udpot/UDPot-master/db.sqlite3`
