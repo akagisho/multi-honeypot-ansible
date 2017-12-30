@@ -3,7 +3,7 @@ Description = udpot daemon
 
 [Service]
 WorkingDirectory = /home/udpot/UDPot-master
-ExecStart = /usr/bin/python /home/udpot/UDPot-master/dns.py 8.8.8.8 -p {{ udpot_port }}
+ExecStart = /usr/bin/python /home/udpot/UDPot-master/dns.py 8.8.8.8 -p {{ udpot_port }} --sql=sqlite:////var/log/udpot/db.sqlite3
 Restart = always
 Type = simple
 User = udpot

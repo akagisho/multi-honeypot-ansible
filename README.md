@@ -52,6 +52,6 @@ Run ansible playbook.
 ## View results
 
 - iplog: `/var/log/iplog/iplog`
-- cowrie log: `/home/cowrie/cowrie-*/log/`
+- cowrie log: `/var/log/cowrie/`
 - Maildir: `/home/honeypot/Maildir/new/`
-- UDPot log: `/home/udpot/UDPot-master/db.sqlite3`
+- UDPot log: `/var/log/udpot/db.sqlite3`

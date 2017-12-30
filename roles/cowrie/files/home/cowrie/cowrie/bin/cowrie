@@ -67,7 +67,7 @@ cowrie_start() {
     then
         TWISTEDARGS="${TWISTEDARGS} -l -"
     else
-        TWISTEDARGS="${TWISTEDARGS} -l log/cowrie.log"
+        TWISTEDARGS="${TWISTEDARGS} -l /var/log/cowrie/cowrie.log"
     fi
 
     if [ "$VIRTUALENV_ENABLED" = "yes" ]

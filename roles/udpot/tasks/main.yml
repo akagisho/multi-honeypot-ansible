@@ -4,6 +4,13 @@
     name: udpot
     state: present
 
+- name: create log directory
+  file:
+    dest: /var/log/udpot
+    owner: wordpot
+    group: wordpot
+    state: directory
+
 - name: download source
   get_url:
     url: https://github.com/jekil/UDPot/archive/master.tar.gz
@@ -18,6 +25,12 @@
     owner: udpot
     group: users
   notify: restart udpot
+
+- name: apply patch
+  lineinfile:
+    path: /home/udpot/UDPot-master/dns.py
+    regexp: '^parser\.add_argument\("-s",'
+    line: 'parser.add_argument("-s", "--sql", type=str, default="sqlite:///db.sqlite3", help="database connection string")'
 
 - name: install pip modules
   pip:

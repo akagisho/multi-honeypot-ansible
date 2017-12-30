@@ -25,6 +25,17 @@
   register: result
   changed_when: '"Installed" in result.stdout'
 
+- name: create log directories
+  file:
+    dest: "{{ item }}"
+    owner: cowrie
+    group: cowrie
+    state: directory
+  with_items:
+    - /var/log/cowrie
+    - /var/log/cowrie/tty
+    - /var/log/cowrie/dl
+
 - name: download source
   get_url:
     url: https://github.com/micheloosterhof/cowrie/archive/v{{ cowrie_version }}.tar.gz

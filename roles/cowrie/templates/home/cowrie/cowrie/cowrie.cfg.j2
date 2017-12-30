@@ -26,13 +26,13 @@ hostname = localhost
 # Directory where to save log files in.
 #
 # (default: log)
-log_path = log
+log_path = /var/log/cowrie
 
 
 # Directory where to save downloaded artifacts in.
 #
 # (default: dl)
-download_path = dl
+download_path = /var/log/cowrie/dl
 
 
 # Directory for miscellaneous data files, such as the password database.
@@ -354,7 +354,7 @@ reported_port = 23
 # JSON based logging module
 #
 [output_jsonlog]
-logfile = log/cowrie.json
+logfile = /var/log/cowrie/cowrie.json
 
 
 # Supports logging to Elasticsearch
