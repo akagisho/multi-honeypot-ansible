@@ -15,10 +15,19 @@
     - mpfr-devel
     - libmpc-devel
 
+- name: install pip
+  shell: easy_install pip
+  register: result
+  changed_when: '"Installed" in result.stdout'
+
+- name: upgrade setuptools
+  shell: pip install --upgrade setuptools
+  register: result
+  changed_when: '"already up-to-date" not in result.stdout'
+
 - name: install python modules
   shell: easy_install {{ item }}
   with_items:
-    - pip
     - PyCrypto
     - pyasn1
     - twisted
