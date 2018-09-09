@@ -1,5 +1,6 @@
 ---
-cowrie_version: 1.2.0
+cowrie_version: 1.3.0
 cowrie_ssh_port: 2222
 cowrie_telnet_port: 2223
 cowrie_use_wellknown_port: True
+python_version: 2.7.15

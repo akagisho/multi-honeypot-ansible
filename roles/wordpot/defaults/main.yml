@@ -1,3 +1,4 @@
 ---
 wordpot_port: 2080
 wordpot_title: 'My Blog'
+python_version: 2.7.15

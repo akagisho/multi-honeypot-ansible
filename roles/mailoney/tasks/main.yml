@@ -4,6 +4,13 @@
     name: mailoney
     state: present
 
+- name: install python {{ python_version }} via pyenv
+  shell: /usr/local/bin/pyenv-switch.sh {{ python_version }}
+  become: yes
+  become_user: mailoney
+  register: result
+  changed_when: '"switched" in result.stdout'
+
 - name: download source
   get_url:
     url: https://github.com/awhitehatter/mailoney/archive/{{ mailoney_version }}.tar.gz

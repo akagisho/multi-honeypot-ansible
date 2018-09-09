@@ -29,3 +29,22 @@
     permanent: true
     immediate: true
     state: enabled
+
+- name: install packages for pyenv
+  yum: name={{ item }}
+  with_items:
+    - readline-devel
+    - zlib-devel
+    - libffi-devel
+    - bzip2-devel
+    - sqlite-devel
+    - openssl-devel
+
+- name: put pyenv scripts
+  copy:
+    src: "{{ item }}"
+    dest: /usr/local/bin/
+    mode: 0755
+  with_items:
+    - usr/local/bin/pyenv-setup.sh
+    - usr/local/bin/pyenv-switch.sh

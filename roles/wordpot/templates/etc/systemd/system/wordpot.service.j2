@@ -3,7 +3,7 @@ Description = wordpot daemon
 
 [Service]
 WorkingDirectory = /home/wordpot/wordpot-master
-ExecStart = /usr/bin/python /home/wordpot/wordpot-master/wordpot.py --port {{ wordpot_port }} --title '{{ wordpot_title }}'
+ExecStart = /home/wordpot/.pyenv/shims/python wordpot.py --port {{ wordpot_port }} --title '{{ wordpot_title }}'
 Restart = always
 Type = simple
 User = wordpot

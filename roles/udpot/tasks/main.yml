@@ -4,6 +4,13 @@
     name: udpot
     state: present
 
+- name: install python {{ python_version }} via pyenv
+  shell: /usr/local/bin/pyenv-switch.sh {{ python_version }}
+  become: yes
+  become_user: udpot
+  register: result
+  changed_when: '"switched" in result.stdout'
+
 - name: create log directory
   file:
     dest: /var/log/udpot
@@ -35,6 +42,9 @@
 - name: install pip modules
   pip:
     requirements: /home/udpot/UDPot-master/requirements.txt
+    executable: /home/udpot/.pyenv/shims/pip
+  become: yes
+  become_user: udpot
 
 - name: put systemd config file
   template:

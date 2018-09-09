@@ -3,7 +3,7 @@ Description = cowrie daemon
 
 [Service]
 WorkingDirectory = /home/cowrie/cowrie-{{ cowrie_version }}
-ExecStart = /home/cowrie/cowrie-{{ cowrie_version }}/bin/cowrie start
+ExecStart = /bin/bash -c 'PATH="$HOME/.pyenv/shims:$PATH" exec $HOME/cowrie-{{ cowrie_version }}/bin/cowrie start'
 Restart = always
 Type = simple
 User = cowrie
