@@ -7,8 +7,8 @@
 - name: create log directory
   file:
     dest: /var/log/udpot
-    owner: wordpot
-    group: wordpot
+    owner: udpot
+    group: udpot
     state: directory
 
 - name: download source
