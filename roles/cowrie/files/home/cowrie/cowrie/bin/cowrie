@@ -2,8 +2,9 @@
 #Change the below to yes if you are using authbind to listen to port 22
 AUTHBIND_ENABLED=no
 
-#Change the below to yes to activate the "cowrie-env" virtual environment
-VIRTUALENV_ENABLED=no
+# To override the default virtual enviroment, either set COWRIE_VIRTUAL_ENV or
+# activate it before starting Cowrie
+#COWRIE_VIRTUAL_ENV=my-env
 
 #Change the below to -n to disable daemonizing (for instance when using supervisor)
 DAEMONIZE="-n"
@@ -12,6 +13,15 @@ DAEMONIZE="-n"
 ## don't modify below here ##
 ################################################################################
 
+# The default Python virtual environment is "cowrie-env". If you set the variable
+# COWRIE_VIRTUAL_ENV you can override this
+DEFAULT_VIRTUAL_ENV=cowrie-env
+
+first_time_use() {
+    echo
+    echo "Join the Cowrie community at: http://bit.ly/cowrieslack"
+    echo
+}
 
 find_cowrie_directory() {
     # Determine Cowrie directory
@@ -27,18 +37,12 @@ find_cowrie_directory() {
 activate_venv() {
     # Activate Python virtual environment
     VENV="$1"
-    if [ ! -d "$VENV" ]
-    then
-        echo "The specified virtualenv \"$VENV\" was not found!"
-        exit 1
-    fi
     if [ ! -f "$VENV/bin/activate" ]
     then
-        echo "The specified virtualenv \"$VENV\" was not found!"
-        exit 2
+        return 1
     fi
-    echo "Activating virtualenv \"$VENV\""
     . $VENV/bin/activate
+    return 0
 }
 
 cowrie_status() {
@@ -60,19 +64,32 @@ cowrie_status() {
 cowrie_start() {
     # Start Cowrie
     COWRIEARGS="$*"
-    TWISTEDARGS="${DAEMONIZE} ${XARGS} --umask 0077 --pidfile ${PIDFILE}"
+    TWISTEDARGS="${DAEMONIZE} ${XARGS} --umask 0022 --pidfile ${PIDFILE}"
 
     # For Docker log to stdout, for non-Docker log to file
-    if [ "$DOCKER" = "yes" ]
-    then
+    if [ "$DOCKER" = "yes" ]; then
         TWISTEDARGS="${TWISTEDARGS} -l -"
     else
         TWISTEDARGS="${TWISTEDARGS} -l /var/log/cowrie/cowrie.log"
     fi
 
-    if [ "$VIRTUALENV_ENABLED" = "yes" ]
-    then
-        activate_venv "cowrie-env"
+    # 1. Check if any virtual environment is active
+    # 2. Try COWRIE_VIRTUAL_ENV if defined
+    # 3. Try DEFAULT_VIRTUAL_ENV
+    # 4. Try ../DEFAULT_VIRTUAL_ENV
+    # 5. Try without virtual environment
+
+    if [ ! -z "$VIRTUAL_ENV" ]; then
+        echo 2>&1 "Using activated Python virtual environment \"$VIRTUAL_ENV\""
+    elif activate_venv "$COWRIE_VIRTUAL_ENV"; then
+        echo 2>&1 "Using custom Python virtual environment \"$VIRTUAL_ENV\""
+    elif activate_venv "$DEFAULT_VIRTUAL_ENV"; then
+        echo 2>&1 "Using default Python virtual environment \"$VIRTUAL_ENV\""
+    # Look one directory higher for the virtual env to not pollute the Cowrie dir
+    elif activate_venv "../$DEFAULT_VIRTUAL_ENV"; then
+        echo 2>&1 "Using default Python virtual environment \"$VIRTUAL_ENV\""
+    else
+        echo 2>&1 "Not using Python virtual environment"
     fi
 
     echo "Starting cowrie: [twistd ${TWISTEDARGS} cowrie ${COWRIEARGS}]..."
@@ -100,8 +117,36 @@ cowrie_stop () {
     fi
 }
 
+cowrie_force_stop () {
+    # Force Stop Cowrie
+    PID=$(cat ${PIDFILE} 2>/dev/null || echo -n "")
+    if [ -n "$PID" ]; then
+        echo -n "Stopping cowrie..."
+        if kill -TERM $PID; then
+            ((t = 60))
+            while ((t > 1)); do
+                sleep 1
+                echo -n .
+                if kill -0 $PID 2>/dev/null; then
+                    ((t -= 1))
+                else
+                    echo "terminated."
+                    return
+                fi
+            done
+            kill -KILL $PID
+            echo "killed."
+        else
+            echo "Removing stale PID file"
+            rm -f ${PIDFILE}
+        fi
+    else
+        echo "cowrie is not running."
+    fi
+}
+
 cowrie_usage() {
-    echo "usage: $0 <start|stop|status>"
+    echo "usage: $0 <start|stop|force-stop|restart|status>"
 }
 
 ################################################################################
@@ -116,9 +161,22 @@ fi
 
 find_cowrie_directory $0
 cd ${COWRIEDIR}
-export PYTHONPATH=${PYTHONPATH}:${COWRIEDIR}
+export PYTHONPATH=${PYTHONPATH}:${COWRIEDIR}/src
+
+# This is for the move to src/ on 2018-07-21
+# It deletes old compiled python code
+# Can be removed at some time in the future
+for dir in ${COWRIEDIR}/twisted ${COWRIEDIR}/cowrie; do
+    [ -d ${dir} ] && find ${dir} -name '*pyc' | xargs rm -f
+done
+
 PIDFILE=var/run/cowrie.pid
 set -e
+
+if [ ! -f ${COWRIEDIR}/log/cowrie.log ]
+then
+    first_time_use
+fi
 
 key=$1
 shift 1
@@ -126,7 +184,14 @@ case $key in
     stop)
         cowrie_stop $*
         ;;
+    force-stop)
+        cowrie_force_stop $*
+        ;;
     start)
+        cowrie_start $*
+        ;;
+    restart)
+        cowrie_stop $*
         cowrie_start $*
         ;;
     status)

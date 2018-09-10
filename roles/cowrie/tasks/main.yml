@@ -33,12 +33,12 @@
 
 - name: download source
   get_url:
-    url: https://github.com/micheloosterhof/cowrie/archive/v{{ cowrie_version }}.tar.gz
-    dest: /usr/local/src/cowrie-v{{ cowrie_version }}.tar.gz
+    url: https://github.com/micheloosterhof/cowrie/archive/{{ cowrie_version }}.tar.gz
+    dest: /usr/local/src/cowrie-{{ cowrie_version }}.tar.gz
 
 - name: unarchive source
   unarchive:
-    src: /usr/local/src/cowrie-v{{ cowrie_version }}.tar.gz
+    src: /usr/local/src/cowrie-{{ cowrie_version }}.tar.gz
     dest: /home/cowrie
     creates: /home/cowrie/cowrie-{{ cowrie_version }}/README.md
     remote_src: yes
@@ -69,11 +69,11 @@
     owner: cowrie
 
 - name: install pip modules
-  pip:
-    requirements: /home/cowrie/cowrie-{{ cowrie_version }}/requirements.txt
-    executable: /home/cowrie/.pyenv/shims/pip
+  shell: ~/.pyenv/shims/pip install --upgrade -r /home/cowrie/cowrie-{{ cowrie_version }}/requirements.txt
   become: yes
   become_user: cowrie
+  register: result
+  changed_when: '"up-to-date" not in result.stdout'
 
 - name: put systemd config file
   template:
