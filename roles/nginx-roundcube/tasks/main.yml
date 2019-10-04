@@ -1,0 +1,77 @@
+---
+- name: install packages
+  yum:
+    name:
+      - php-xml
+      - php-pdo
+      - php-gd
+      - php-zip
+      - git
+      - wget
+      - unzip
+    enablerepo:
+      - remi-php74
+  notify: restart php-fpm
+
+- name: get source
+  get_url:
+    url: https://github.com/roundcube/roundcubemail/releases/download/{{ roundcube_version }}/roundcubemail-{{ roundcube_version }}.tar.gz
+    dest: /usr/local/src
+
+- name: unarchive source
+  unarchive:
+    src: /usr/local/src/roundcubemail-{{ roundcube_version }}.tar.gz
+    dest: /var/www
+    owner: nginx
+    group: nginx
+    creates: /var/www/roundcubemail-{{ roundcube_version }}
+    remote_src: yes
+
+- name: set permission
+  file:
+    path:
+      - /var/www/roundcubemail-{{ roundcube_version }}/logs
+      - /var/www/roundcubemail-{{ roundcube_version }}/temp
+    state: directory
+    mode: '0777'
+
+- name: put config file
+  copy:
+    src: var/www/roundcubemail/config/config.inc.php
+    dest: /var/www/roundcubemail-{{ roundcube_version }}/config/config.inc.php
+    owner: nginx
+    group: nginx
+
+- name: copy composer.json
+  shell: cp -v composer.json-dist composer.json
+  become_user: nginx
+  args:
+    chdir: /var/www/roundcubemail-{{ roundcube_version }}
+    creates: /var/www/roundcubemail-{{ roundcube_version }}/composer.json
+
+- name: install pear packages
+  composer:
+    command: install
+    working_dir: /var/www/roundcubemail-{{ roundcube_version }}
+
+- name: install js packages
+  shell: ./bin/install-jsdeps.sh
+  become_user: nginx
+  args:
+    chdir: /var/www/roundcubemail-{{ roundcube_version }}
+    creates: /var/www/roundcubemail-{{ roundcube_version }}/public_html/program/js/jquery.min.js
+
+- name: put nginx config file
+  template:
+    src: '{{ item }}'
+    dest: /etc/nginx/conf.d/{{ item | basename | regex_replace('\.j2$','') }}
+  with_fileglob:
+    - ../templates/etc/nginx/conf.d/*.j2
+  notify: reload nginx
+
+- name: open port
+  firewalld:
+    port: '{{ roundcube_port }}/tcp'
+    permanent: true
+    immediate: true
+    state: enabled

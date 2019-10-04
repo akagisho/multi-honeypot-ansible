@@ -1,4 +1,17 @@
 ---
+- name: generate user password
+  shell:
+    test -f /home/honeypot/.password
+    && cat /home/honeypot/.password
+    || (cat /dev/urandom | tr -dc '[:alnum:]' | head -c 8)
+  changed_when: False
+  register: last_result
+
+- name: set var
+  set_fact:
+    user_password: "{{ last_result.stdout }}"
+  changed_when: False
+
 - name: create group
   group:
     name: honeypot
@@ -6,8 +19,16 @@
 - name: add user
   user:
     name: honeypot
-    state: present
     groups: honeypot
+    password: "{{ user_password | password_hash('sha512') }}"
+    update_password: on_create
+    state: present
+
+- name: put .password file
+  template:
+    src: home/honeypot/.password.j2
+    dest: /home/honeypot/.password
+    mode: "0600"
 
 - name: install packages
   yum: name={{ item }}
@@ -15,6 +36,7 @@
     - firewalld
     - logrotate
     - http://ftp.riken.jp/Linux/fedora/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
+    - http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 
 - name: start firewalld automatically
   systemd:

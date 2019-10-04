@@ -9,7 +9,10 @@
     - cowrie
     - mailoney
     - postfix
+    - dovecot
     - nginx
+    - nginx-php-fpm
     - nginx-awstats
+    - nginx-roundcube
     - wordpot
     - udpot

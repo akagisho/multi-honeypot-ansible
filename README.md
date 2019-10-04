@@ -53,5 +53,7 @@ Run ansible playbook.
 
 - iplog: `/var/log/iplog/iplog`
 - cowrie log: `/var/log/cowrie/`
-- Maildir: `/home/honeypot/Maildir/new/`
 - UDPot log: `/var/log/udpot/db.sqlite3`
+- Maildir: `/home/honeypot/Maildir/new/`
+- webmail: http://honeypot.example.com:10081/
+  - password: `/home/honeypot/.password`

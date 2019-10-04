@@ -1,0 +1,16 @@
+server {
+    listen       {{ roundcube_port }};
+    server_name  localhost;
+    root   /var/www/roundcubemail-{{ roundcube_version }};
+
+    location / {
+        index  index.php;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass   unix:/var/run/php-fpm/php-fpm.sock;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+}

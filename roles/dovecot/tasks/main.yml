@@ -1,0 +1,27 @@
+---
+- name: install dovecot
+  yum:
+    name:
+      - dovecot
+  notify: restart dovecot
+
+- name: start dovecot automatically
+  systemd:
+    name: dovecot.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+- name: put config file
+  copy:
+    src: etc/dovecot/dovecot.conf
+    dest: /etc/dovecot/dovecot.conf
+  notify: restart dovecot
+
+- name: put config files
+  template:
+    src: '{{ item }}'
+    dest: /etc/dovecot/{{ item | basename | regex_replace('\.j2$','') }}
+  with_fileglob:
+    - ../templates/etc/dovecot/*.j2
+  notify: restart dovecot

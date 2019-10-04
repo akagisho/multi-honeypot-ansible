@@ -1,0 +1,36 @@
+---
+- name: install packages
+  yum:
+    name:
+      - php
+      - php-pear
+      - php-mbstring
+      - php-fpm
+    enablerepo:
+      - remi-php74
+  notify: restart php-fpm
+
+- name: put php-fpm config file
+  copy:
+    src: etc/php-fpm.d/www.conf
+    dest: /etc/php-fpm.d/www.conf
+  notify: restart php-fpm
+
+- name: put php.ini
+  template:
+    src: etc/php.ini.j2
+    dest: /etc/php.ini
+  notify: restart php-fpm
+
+- name: start php-fpm automatically
+  systemd:
+    name: php-fpm.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+
+- name: install composer
+  shell: curl https://getcomposer.org/installer | php && mv -v composer.phar /usr/bin/composer
+  args:
+    chdir: /tmp
+    creates: /usr/bin/composer
