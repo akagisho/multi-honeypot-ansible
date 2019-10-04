@@ -14,7 +14,7 @@ Set up various honeypot servers
 ## Requirements
 
 * CentOS 7.x
- * sshd is running without port 25
+ * sshd is running without port 22
 * Ansible 2.2+
 
 For local development environment:
