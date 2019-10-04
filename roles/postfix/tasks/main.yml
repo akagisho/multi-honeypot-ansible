@@ -6,9 +6,11 @@
   notify: restart postfix
 
 - name: start postfix automatically
-  service:
-    name: postfix
+  systemd:
+    name: postfix.service
     state: started
+    daemon_reload: yes
+    enabled: yes
 
 - name: put config files
   template:
