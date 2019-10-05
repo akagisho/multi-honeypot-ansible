@@ -39,12 +39,20 @@
     regexp: '^parser\.add_argument\("-s",'
     line: 'parser.add_argument("-s", "--sql", type=str, default="sqlite:///db.sqlite3", help="database connection string")'
 
+- set_fact:
+    ansible_python_interpreter: /home/udpot/.pyenv/shims/python
+  changed_when: False
+
 - name: install pip modules
   pip:
     requirements: /home/udpot/UDPot-master/requirements.txt
     executable: /home/udpot/.pyenv/shims/pip
   become: yes
   become_user: udpot
+
+- set_fact:
+    ansible_python_interpreter: /usr/bin/python
+  changed_when: False
 
 - name: put systemd config file
   template:

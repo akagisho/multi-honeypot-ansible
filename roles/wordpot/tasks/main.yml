@@ -26,12 +26,20 @@
     group: users
   #notify: restart wordpot
 
+- set_fact:
+    ansible_python_interpreter: /home/wordpot/.pyenv/shims/python
+  changed_when: False
+
 - name: install pip modules
   pip:
-    requirements: /home/wordpot/wordpot-master/requirements.txt
-    executable: /home/wordpot/.pyenv/shims/pip
+    requirements: requirements.txt
+    chdir: /home/wordpot/wordpot-master
   become: yes
   become_user: wordpot
+
+- set_fact:
+    ansible_python_interpreter: /usr/bin/python
+  changed_when: False
 
 - name: put nginx config file
   template:
