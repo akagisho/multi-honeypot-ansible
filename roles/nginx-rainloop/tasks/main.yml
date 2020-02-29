@@ -1,0 +1,98 @@
+---
+- name: install packages
+  yum:
+    name:
+      - php-pdo
+      - unzip
+    enablerepo:
+      - remi-php74
+  notify: restart php-fpm
+
+- name: get user password
+  shell: cat /home/honeypot/.password
+  changed_when: False
+  register: last_result
+
+- name: set var
+  set_fact:
+    user_password: "{{ last_result.stdout }}"
+  changed_when: False
+
+- name: get source
+  get_url:
+    url: https://github.com/RainLoop/rainloop-webmail/releases/download/v{{ rainloop_version }}/rainloop-community-{{ rainloop_version }}.zip
+    dest: /usr/local/src
+
+- name: create directory
+  file:
+    dest: /var/www/rainloop-{{ rainloop_version }}
+    state: directory
+
+- name: unarchive source
+  unarchive:
+    src: /usr/local/src/rainloop-community-{{ rainloop_version }}.zip
+    dest: /var/www/rainloop-{{ rainloop_version }}
+    owner: nginx
+    group: nginx
+    creates: /var/www/rainloop-{{ rainloop_version }}/index.php
+    remote_src: yes
+
+- name: replace default admin password
+  replace:
+    path: /var/www/rainloop-{{ rainloop_version }}/rainloop/v/{{ rainloop_version }}/app/libraries/RainLoop/Config/Application.php
+    regexp: "12345"
+    replace: "{{ user_password }}"
+
+- name: create config directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: nginx
+    group: nginx
+  with_items:
+    - /var/www/rainloop-{{ rainloop_version }}/data/_data_/_default_/configs
+    - /var/www/rainloop-{{ rainloop_version }}/data/_data_/_default_/domains
+
+- name: set permission
+  file:
+    path:
+      - /var/www/rainloop-{{ rainloop_version }}/data
+    state: directory
+    mode: '0777'
+
+- name: put config file
+  copy:
+    src: var/www/rainloop/data/_data_/_default_/configs/application.ini.orig
+    dest: /var/www/rainloop-{{ rainloop_version }}/data/_data_/_default_/configs/application.ini.orig
+    owner: nginx
+    group: nginx
+
+- name: copy config file
+  shell: cp -pv application.ini.orig application.ini
+  args:
+    chdir: /var/www/rainloop-{{ rainloop_version }}/data/_data_/_default_/configs/
+    creates: /var/www/rainloop-{{ rainloop_version }}/data/_data_/_default_/configs/application.ini
+
+- name: put config files
+  copy:
+    src: "{{ item }}"
+    dest: /var/www/rainloop-{{ rainloop_version }}/data/_data_/_default_/domains/
+    owner: nginx
+    group: nginx
+  with_fileglob:
+    - var/www/rainloop/data/_data_/_default_/domains/*
+
+- name: put nginx config file
+  template:
+    src: '{{ item }}'
+    dest: /etc/nginx/conf.d/{{ item | basename | regex_replace('\.j2$','') }}
+  with_fileglob:
+    - ../templates/etc/nginx/conf.d/*.j2
+  notify: reload nginx
+
+- name: open port
+  firewalld:
+    port: '{{ rainloop_port }}/tcp'
+    permanent: true
+    immediate: true
+    state: enabled

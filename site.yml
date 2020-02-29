@@ -13,6 +13,6 @@
     - nginx
     - nginx-php-fpm
     - nginx-awstats
-    - nginx-roundcube
+    - nginx-rainloop
     - wordpot
     - udpot
