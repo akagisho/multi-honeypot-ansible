@@ -7,6 +7,7 @@
   yum: name={{ item }}
   with_items:
     - libselinux-python
+    - sudo
 
 - name: disable SELinux (Sorry, Ishikawa-san)
   shell: getenforce | grep -q Disabled || (setenforce 0 && echo changed)
@@ -18,3 +19,4 @@
     dest: /etc/selinux/config
     regexp: ^SELINUX=
     line: SELINUX=disabled
+  ignore_errors: True
