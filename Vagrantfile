@@ -2,7 +2,8 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "bento/centos-7.4"
+  config.vm.box = "centos/7"
+  config.vm.box_version = "2004.01"
   config.vm.network "private_network", ip: "10.200.19.34"
 
   config.vm.provider "virtualbox" do |vb|
