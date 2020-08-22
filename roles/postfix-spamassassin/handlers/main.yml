@@ -1,0 +1,13 @@
+---
+- name: reload postfix
+  systemd:
+    name: postfix
+    state: reloaded
+
+- name: restart milter-manager
+  systemd:
+    name: milter-manager
+    state: restarted
+
+- name: update spamassassin
+  shell: /etc/cron.daily/spamassassin-update

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Refer: https://centossrv.com/postfix-spamass-milter.shtml
+
+# SpamAssassin設定ファイル最新版ダウンロード
+cd /etc/mail/spamassassin
+wget -qN -O - https://pastebin.com/raw/QnwRxxBQ |tr -d '\r' > user_prefs
+
+# 設定ファイル更新時のみSpamAssassin再起動
+diff user_prefs user_prefs.org > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    cp user_prefs local.cf
+
+    # スパム判断したメールを添付形式にしないように設定
+    echo -ne "\n\n" >> local.cf
+    echo "report_safe 0" >> local.cf
+
+    # スパム判断したメールの件名に「***SPAM***」を付加するように設定※受信メールサーバーがPOPの場合のみ
+    #echo "rewrite_header Subject ***SPAM***" >> local.cf
+
+    # SpamAssassin再起動
+    if [ -f /etc/rc.d/init.d/spamassassin ]; then
+        /etc/rc.d/init.d/spamassassin restart > /dev/null
+    else
+        systemctl restart spamassassin > /dev/null
+    fi
+fi
+cp user_prefs user_prefs.org

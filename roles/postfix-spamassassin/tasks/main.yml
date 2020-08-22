@@ -1,0 +1,58 @@
+---
+- name: add yum repository
+  shell: curl -s https://packagecloud.io/install/repositories/milter-manager/repos/script.rpm.sh | bash
+  args:
+    creates: /etc/yum.repos.d/milter-manager_repos.repo
+
+- name: install packages
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - wget
+    - net-tools
+    - spamassassin
+    - spamass-milter-postfix
+    - milter-manager
+
+- name: start spamassassin automatically
+  systemd:
+    name: "{{ item }}"
+    state: started
+    daemon_reload: yes
+    enabled: yes
+  with_items:
+    - spamassassin
+    - spamass-milter
+    - milter-manager
+
+- name: modify main.cf
+  lineinfile:
+    dest: /etc/postfix/main.cf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: "^milter_protocol = ", line: "milter_protocol = 6" }
+    - { regexp: "^milter_default_action = ", line: "milter_default_action = tempfail" }
+    - { regexp: "^milter_mail_macros = ", line: "milter_mail_macros = {auth_author} {auth_type} {auth_authen}" }
+    - { regexp: "^smtpd_milters = ", line: "smtpd_milters = unix:/var/run/milter-manager/milter-manager.sock" }
+  notify: reload postfix
+
+- name: add user to group
+  user:
+    name: "{{ item.user }}"
+    groups: "{{ item.group }}"
+    append: yes
+  with_items:
+    - { user: "postfix", group: "milter-manager" }
+    - { user: "milter-manager", group: "postfix" }
+  notify:
+    - reload postfix
+    - restart milter-manager
+
+- name: put spamassassin-update
+  template:
+    src: etc/cron.daily/spamassassin-update.j2
+    dest: /etc/cron.daily/spamassassin-update
+    mode: 0700
+  notify: update spamassassin

@@ -9,6 +9,7 @@
     - cowrie
     - mailoney
     - postfix
+    - postfix-spamassassin
     - dovecot
     - nginx
     - nginx-php-fpm
