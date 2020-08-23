@@ -2,6 +2,8 @@
 
 # Refer: https://centossrv.com/postfix-spamass-milter.shtml
 
+set -e
+
 # SpamAssassin設定ファイル最新版ダウンロード
 cd /etc/mail/spamassassin
 wget -qN -O - https://pastebin.com/raw/QnwRxxBQ |tr -d '\r' > user_prefs
